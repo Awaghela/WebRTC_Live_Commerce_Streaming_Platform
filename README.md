@@ -39,17 +39,20 @@ A production-ready, low-latency live commerce streaming platform built with Pyth
 ## Quick Start
 
 ### macOS / Linux
+
 ```bash
 chmod +x start.sh
 ./start.sh
 ```
 
 ### Windows
+
 ```
 start.bat
 ```
 
 ### Manual
+
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate   # Windows: .venv\Scripts\activate
@@ -63,6 +66,7 @@ Then open `http://localhost:8000` in your browser.
 ## Usage
 
 ### As a Host
+
 1. Click **Go Live**
 2. Fill in stream title, product details, and price
 3. Click **Preview Camera & Go Live** — allow camera/microphone
@@ -70,6 +74,7 @@ Then open `http://localhost:8000` in your browser.
 5. Viewers join using that ID — you'll see their count in real time
 
 ### As a Viewer
+
 1. Click **Join Stream**
 2. Enter your name and the Session ID
 3. Watch the live stream, chat, and click **Buy Now** to signal intent
@@ -120,8 +125,4 @@ Viewer                  Server                   Host
 
 ## Network Requirements
 
-WebRTC requires both peers to be reachable via STUN. For production deployments behind symmetric NAT, add a TURN server to the `iceServers` config in `webrtc.js`.
-
-## License
-
-MIT
+WebRTC requires both peers to be reachable via STUN. For production deployments behind symmetric NAT, add a TURN server to the `iceServers` config in `webrtc.js`
