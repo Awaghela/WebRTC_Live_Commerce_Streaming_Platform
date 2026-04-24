@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LIVEFLUX — Live Commerce</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,600;1,9..40,300&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+<!-- LANDING / HOME SCREEN -->
+<div id="screen-home" class="screen active">
+  <div class="noise-overlay"></div>
+  <header class="top-bar">
+    <div class="logo">LIVE<span>FLUX</span></div>
+    <div class="tagline">Real-time commerce streaming</div>
+  </header>
+
+  <main class="home-main">
+    <div class="hero-text">
+      <div class="live-badge-hero"><span class="dot"></span>LIVE NOW</div>
+      <h1>Stream.<br>Sell.<br>Connect.</h1>
+      <p>Low-latency WebRTC streaming built for live commerce. Host a product drop or join a live sale in seconds.</p>
+    </div>
+
+    <div class="home-actions">
+      <button class="btn-primary" id="btn-go-host">
+        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="10" stroke-width="2"/><polygon points="10,8 16,12 10,16" fill="currentColor"/></svg>
+        Go Live
+      </button>
+      <button class="btn-secondary" id="btn-go-viewer">
+        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke-width="2"/><circle cx="12" cy="12" r="3" stroke-width="2"/></svg>
+        Join Stream
+      </button>
+    </div>
+
+    <div class="active-streams-panel">
+      <div class="panel-header">
+        <span>Active Streams</span>
+        <button class="refresh-btn" id="btn-refresh-sessions">↻ Refresh</button>
+      </div>
+      <div id="sessions-list" class="sessions-list">
+        <div class="empty-state">No live streams right now. Be the first!</div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- HOST SETUP SCREEN -->
+<div id="screen-host-setup" class="screen">
+  <div class="noise-overlay"></div>
+  <button class="back-btn" id="btn-back-from-host">← Back</button>
+  <div class="setup-container">
+    <div class="setup-header">
+      <div class="step-label">STEP 1 OF 2</div>
+      <h2>Set Up Your Stream</h2>
+    </div>
+
+    <div class="form-grid">
+      <div class="form-group full">
+        <label>Stream Title</label>
+        <input type="text" id="stream-title" placeholder="e.g. Summer Drop — Limited Edition Watch" maxlength="80"/>
+      </div>
+      <div class="form-group full">
+        <label>Your Name</label>
+        <input type="text" id="host-username" placeholder="e.g. @sneakerking" maxlength="30"/>
+      </div>
+      <div class="form-group">
+        <label>Product Name</label>
+        <input type="text" id="product-name" placeholder="e.g. Chrono X Pro" maxlength="60"/>
+      </div>
+      <div class="form-group">
+        <label>Price (USD)</label>
+        <input type="number" id="product-price" placeholder="299.99" min="0" step="0.01"/>
+      </div>
+      <div class="form-group full">
+        <label>Product Description</label>
+        <textarea id="product-description" placeholder="Describe your product in a few words..." rows="3" maxlength="200"></textarea>
+      </div>
+      <div class="form-group full">
+        <label>Product Image URL <span class="optional">(optional)</span></label>
+        <input type="url" id="product-image" placeholder="https://..."/>
+      </div>
+    </div>
+
+    <button class="btn-primary full-width" id="btn-preview-camera">
+      <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M23 7l-7 5 7 5V7z" stroke-width="2"/><rect x="1" y="5" width="15" height="14" rx="2" stroke-width="2"/></svg>
+      Preview Camera & Go Live
+    </button>
+  </div>
+</div>
+
+<!-- HOST LIVE SCREEN -->
+<div id="screen-host-live" class="screen">
+  <div class="noise-overlay"></div>
+  <div class="stream-layout">
+    <!-- Video Area -->
+    <div class="video-section">
+      <div class="video-container host-video-container">
+        <video id="local-video" autoplay muted playsinline></video>
+        <div class="video-overlay">
+          <div class="live-indicator"><span class="dot"></span>LIVE</div>
+          <div class="viewer-counter"><svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> <span id="host-viewer-count">0</span></div>
+        </div>
+        <div class="session-id-display">
+          SESSION: <strong id="host-session-id">—</strong>
+          <button class="copy-btn" id="btn-copy-session">Copy</button>
+        </div>
+        <div class="stream-timer" id="stream-timer">00:00</div>
+      </div>
+
+      <!-- Host Controls -->
+      <div class="controls-bar">
+        <button class="ctrl-btn" id="btn-toggle-audio" title="Toggle Audio">
+          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+        </button>
+        <button class="ctrl-btn" id="btn-toggle-video" title="Toggle Video">
+          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+        </button>
+        <button class="ctrl-btn danger" id="btn-end-stream">
+          <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5" fill="none"/></svg>
+          End Stream
+        </button>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <!-- Product Card -->
+      <div class="product-card" id="host-product-card">
+        <img id="host-product-img" src="" alt="Product" class="product-img"/>
+        <div class="product-info">
+          <div class="product-name" id="host-product-name">—</div>
+          <div class="product-price" id="host-product-price">$—</div>
+          <div class="product-desc" id="host-product-desc"></div>
+        </div>
+        <div class="purchase-counter">
+          <span id="purchase-count">0</span> purchases during stream
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat"><div class="stat-val" id="stat-peak">0</div><div class="stat-lbl">Peak Viewers</div></div>
+        <div class="stat"><div class="stat-val" id="stat-messages">0</div><div class="stat-lbl">Chat Messages</div></div>
+        <div class="stat"><div class="stat-val" id="stat-purchases">0</div><div class="stat-lbl">Purchases</div></div>
+      </div>
+
+      <!-- Chat -->
+      <div class="chat-section">
+        <div class="chat-header">LIVE CHAT</div>
+        <div class="chat-messages" id="host-chat-messages"></div>
+        <div class="chat-input-row">
+          <input type="text" id="host-chat-input" placeholder="Say something..." maxlength="200"/>
+          <button id="btn-host-send-chat">↑</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- VIEWER JOIN SCREEN -->
+<div id="screen-viewer-join" class="screen">
+  <div class="noise-overlay"></div>
+  <button class="back-btn" id="btn-back-from-viewer">← Back</button>
+  <div class="setup-container">
+    <div class="setup-header">
+      <div class="step-label">JOIN A STREAM</div>
+      <h2>Enter Session ID</h2>
+    </div>
+
+    <div class="form-grid">
+      <div class="form-group full">
+        <label>Your Name</label>
+        <input type="text" id="viewer-username" placeholder="e.g. @shopaholic42" maxlength="30"/>
+      </div>
+      <div class="form-group full">
+        <label>Session ID</label>
+        <input type="text" id="session-id-input" placeholder="e.g. A3B9FC12" maxlength="8" style="letter-spacing:0.15em; text-transform:uppercase; font-family:'JetBrains Mono', monospace;"/>
+      </div>
+    </div>
+
+    <button class="btn-primary full-width" id="btn-join-stream">
+      <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M14 12H3" stroke-width="2"/></svg>
+      Join Stream
+    </button>
+
+    <div id="join-error" class="error-msg" style="display:none"></div>
+  </div>
+</div>
+
+<!-- VIEWER LIVE SCREEN -->
+<div id="screen-viewer-live" class="screen">
+  <div class="noise-overlay"></div>
+  <div class="stream-layout viewer-layout">
+    <!-- Video -->
+    <div class="video-section">
+      <div class="video-container viewer-video-container">
+        <video id="remote-video" autoplay playsinline></video>
+        <div class="video-overlay">
+          <div class="live-indicator"><span class="dot"></span>LIVE</div>
+          <div class="viewer-counter"><svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> <span id="viewer-count-display">0</span></div>
+        </div>
+        <div class="stream-title-overlay" id="viewer-stream-title">—</div>
+
+        <!-- Connection status -->
+        <div class="conn-status" id="conn-status">
+          <div class="spinner"></div>
+          Connecting to stream...
+        </div>
+      </div>
+
+      <!-- Viewer Controls -->
+      <div class="controls-bar viewer-controls">
+        <button class="ctrl-btn" id="btn-viewer-volume" title="Toggle Volume">
+          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+        </button>
+        <button class="ctrl-btn danger" id="btn-leave-stream">
+          Leave
+        </button>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <!-- Product Card -->
+      <div class="product-card viewer-product">
+        <img id="viewer-product-img" src="" alt="Product" class="product-img"/>
+        <div class="product-info">
+          <div class="product-name" id="viewer-product-name">—</div>
+          <div class="product-price" id="viewer-product-price">$—</div>
+          <div class="product-desc" id="viewer-product-desc"></div>
+        </div>
+        <button class="btn-buy" id="btn-buy-now">
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+          Buy Now — <span id="btn-buy-price">$—</span>
+        </button>
+      </div>
+
+      <!-- Chat -->
+      <div class="chat-section">
+        <div class="chat-header">LIVE CHAT</div>
+        <div class="chat-messages" id="viewer-chat-messages"></div>
+        <div class="chat-input-row">
+          <input type="text" id="viewer-chat-input" placeholder="Say something..." maxlength="200"/>
+          <button id="btn-viewer-send-chat">↑</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Purchase Alert Toast -->
+<div id="purchase-toast" class="purchase-toast" style="display:none">
+  <div class="toast-icon">🛍️</div>
+  <div class="toast-text"></div>
+</div>
+
+<!-- Notification -->
+<div id="notification" class="notification" style="display:none"></div>
+
+<script src="/static/js/webrtc.js"></script>
+<script src="/static/js/app.js"></script>
+</body>
+</html>
